@@ -1,5 +1,5 @@
-import XCTest
 @testable import Reflow
+import XCTest
 
 final class CombineReducersTests: XCTestCase {
     func testWithKey() {

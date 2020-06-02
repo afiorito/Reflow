@@ -12,7 +12,7 @@ public typealias Reducer<State> = (State, Action) -> State
 ///     - reducers: The reducers to be combined.
 /// - Returns: A single reducer that returns the same type of state.
 public func combineReducers<State>(_ reducers: Reducer<State>...) -> Reducer<State> {
-    return { state, action in
+    { state, action in
         (reducers.reduce(state) { accumulatedState, reducer in
             reducer(accumulatedState, action)
         })
@@ -27,7 +27,7 @@ public func combineReducers<State>(_ reducers: Reducer<State>...) -> Reducer<Sta
 /// - Returns: A reducer that returns the entire state.
 public func withKey<State, SubState>(_ keyPath: WritableKeyPath<State, SubState>,
                                      use reducer: @escaping Reducer<SubState>) -> Reducer<State> {
-    return { state, action in
+    { state, action in
         var state = state
         state[keyPath: keyPath] = reducer(state[keyPath: keyPath], action)
         return state

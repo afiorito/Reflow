@@ -1,5 +1,5 @@
-import XCTest
 import Reflow
+import XCTest
 
 // MARK: - Counter
 
@@ -7,7 +7,7 @@ struct MockCounterState: Equatable {
     var counter = 0
 
     static func reducer(state: Self, action: Action) -> Self {
-        return state
+        state
     }
 
     static var dispatchedActions = [Action]()
@@ -16,12 +16,12 @@ struct MockCounterState: Equatable {
         dispatchedActions.append(action)
 
         switch action {
-        case MockCounterAction.increment:
-            return Self(counter: state.counter + 1)
-        case MockCounterAction.loadCounterCompleted(let value):
-            return Self(counter: value)
-        default:
-            return state
+            case MockCounterAction.increment:
+                return Self(counter: state.counter + 1)
+            case let MockCounterAction.loadCounterCompleted(value):
+                return Self(counter: value)
+            default:
+                return state
         }
     }
 }
@@ -38,10 +38,10 @@ struct MockRouteState: Equatable {
 
     static func reducer(state: Self, action: Action) -> Self {
         switch action {
-        case MockRouteAction.set(let route):
-            return Self(route: route)
-        default:
-            return state
+            case let MockRouteAction.set(route):
+                return Self(route: route)
+            default:
+                return state
         }
     }
 }
@@ -57,7 +57,7 @@ struct MockStatusState: Equatable {
     let online: Bool
 
     static func reducer(state: Self, action: Action) -> Self {
-        return state
+        state
     }
 }
 
@@ -72,40 +72,40 @@ struct NoAction: Action {}
 
 // MARK: - Middleware
 
-var mockFirstMiddleware: Middleware<MockRouteState> = { dispatch, getState in
-    return { next in
-        return { action in
+var mockFirstMiddleware: Middleware<MockRouteState> = { _, _ in
+    { next in
+        { action in
             switch action {
-            case MockRouteAction.set(let route):
-                next(MockRouteAction.set(route + " FIRST"))
-            default:
-                next(action)
+                case let MockRouteAction.set(route):
+                    next(MockRouteAction.set(route + " FIRST"))
+                default:
+                    next(action)
             }
         }
     }
 }
 
-var mockSecondMiddleware: Middleware<MockRouteState> = { dispatch, getState in
-    return { next in
-        return { action in
+var mockSecondMiddleware: Middleware<MockRouteState> = { _, _ in
+    { next in
+        { action in
             switch action {
-            case MockRouteAction.set(let route):
-                next(MockRouteAction.set(route + " SECOND"))
-            default:
-                next(action)
+                case let MockRouteAction.set(route):
+                    next(MockRouteAction.set(route + " SECOND"))
+                default:
+                    next(action)
             }
         }
     }
 }
 
-let mockDispatchingMiddleware: Middleware<MockRouteState> = { dispatch, getState in
-    return { next in
-        return { action in
+let mockDispatchingMiddleware: Middleware<MockRouteState> = { dispatch, _ in
+    { next in
+        { action in
             switch action {
-            case MockRouteAction.setIndex(let index):
-                dispatch(MockRouteAction.set("\(index)"))
-            default:
-                break
+                case let MockRouteAction.setIndex(index):
+                    dispatch(MockRouteAction.set("\(index)"))
+                default:
+                    break
             }
 
             next(action)
@@ -114,8 +114,8 @@ let mockDispatchingMiddleware: Middleware<MockRouteState> = { dispatch, getState
 }
 
 let mockStateAccessingMiddleware: Middleware<MockRouteState> = { dispatch, getState in
-    return { next in
-        return { action in
+    { next in
+        { action in
             // Stop recursion caused by dispatching the same action
             if case let MockRouteAction.set(route) = action, route != "BACK", getState().route == "FRONT" {
                 dispatch(MockRouteAction.set("BACK"))

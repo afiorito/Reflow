@@ -1,0 +1,10 @@
+# file options
+
+--exclude Tests/ReflowTests/XCTestManifests.swift
+
+# format options
+
+--indentcase true
+--maxwidth 120
+--tabwidth 4
+--stripunusedargs closure-only

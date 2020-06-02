@@ -21,5 +21,4 @@ public struct Effect<State>: Action {
             Just(block(dispatch, getState)).ignoreOutput().sink(receiveValue: {})
         }
     }
-
 }

@@ -1,9 +1,8 @@
-import XCTest
 import Combine
 @testable import Reflow
+import XCTest
 
 final class DispatchTests: XCTestCase {
-
     var store: Store<MockCounterState>!
     var cancellable: AnyCancellable?
 
@@ -40,8 +39,8 @@ final class DispatchTests: XCTestCase {
 
     func testDispatchAsyncEffect() {
         let effectExpectation = expectation(description: "effect_dispatched")
-         store.dispatch(Effect<MockCounterState> { _, _ -> AnyCancellable in
-            return Just(0).delay(for: .milliseconds(10), scheduler: RunLoop.main)
+        store.dispatch(Effect<MockCounterState> { _, _ -> AnyCancellable in
+            Just(0).delay(for: .milliseconds(10), scheduler: RunLoop.main)
                 .sink(receiveCompletion: { _ in
                     effectExpectation.fulfill()
                 }, receiveValue: { _ in })
@@ -55,7 +54,10 @@ final class DispatchTests: XCTestCase {
             dispatch(MockCounterAction.loadCounterCompleted(100))
         })
 
-        XCTAssertEqual(MockCounterState.dispatchedActions[0] as? MockCounterAction, MockCounterAction.loadCounterCompleted(100))
+        XCTAssertEqual(
+            MockCounterState.dispatchedActions[0] as? MockCounterAction,
+            MockCounterAction.loadCounterCompleted(100)
+        )
 
         let valueExpectation = expectation(description: "value_received")
         cancellable = store.$state.sink { state in
@@ -78,7 +80,10 @@ final class DispatchTests: XCTestCase {
             }
         })
 
-        XCTAssertEqual(MockCounterState.dispatchedActions[1] as? MockCounterAction, MockCounterAction.loadCounterCompleted(50))
+        XCTAssertEqual(
+            MockCounterState.dispatchedActions[1] as? MockCounterAction,
+            MockCounterAction.loadCounterCompleted(50)
+        )
 
         let valueExpectation = expectation(description: "value_received")
         cancellable = store.$state.sink { state in
@@ -87,6 +92,5 @@ final class DispatchTests: XCTestCase {
         }
 
         wait(for: [valueExpectation], timeout: 10)
-
     }
 }

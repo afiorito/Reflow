@@ -1,7 +1,7 @@
 import Combine
 
-/// A container for managing state using Combine. Manages functionality for dispatching actions/effects, running middleware,
-/// executing reducers and publishing the latest state.
+/// A container for managing state using Combine. Manages functionality for dispatching actions/effects,
+/// running middleware, executing reducers and publishing the latest state.
 open class Store<State> {
     public typealias Output = State
     public typealias Failure = Never
@@ -19,10 +19,10 @@ open class Store<State> {
     ///     - middleware: The middleware that process an action prior to reaching the reducer.
     public init(reducer: @escaping Reducer<State>, initialState: State, middleware: [Middleware<State>] = []) {
         self.reducer = reducer
-        self.state = initialState
         self.middleware += middleware
-        self.dispatcher = createDispatcher(initialState: initialState)
-        self.effectDispatcher = createEffectDispatch(initialState: initialState)
+        state = initialState
+        dispatcher = createDispatcher(initialState: initialState)
+        effectDispatcher = createEffectDispatch(initialState: initialState)
     }
 
     /// Dispatches an `action`. Sends the `action` through the middleware pipeline and calls the reducer
@@ -50,7 +50,7 @@ open class Store<State> {
     ///     - selector: A transformation function for returning derived data from the state.
     /// - Returns: A publisher for the derived data specified in the `selector`.
     public func select<Prop: Equatable>(_ selector: @escaping (State) -> (Prop)) -> AnyPublisher<Prop, Never> {
-        return $state.map(selector).removeDuplicates().eraseToAnyPublisher()
+        $state.map(selector).removeDuplicates().eraseToAnyPublisher()
     }
 
     /// Generates a new version of the state by calling the reducer with the current state and provided `action`.
@@ -67,10 +67,10 @@ open class Store<State> {
     ///     - initialState: The initial state passed during initialization.
     /// - Returns: A dispatch function wrapped with registered middleware.
     private func createDispatcher(initialState: State) -> Dispatch {
-        return middleware.reversed().reduce({ [weak self] action in self?.reduce(action) }, { dispatcher, middleware in
-                let dispatch: Dispatch = { [weak self] in self?.dispatch($0) }
-                let getState = { [weak self] in self?.state ?? initialState }
-                return middleware(dispatch, getState)(dispatcher)
+        middleware.reversed().reduce({ [weak self] action in self?.reduce(action) }, { dispatcher, middleware in
+            let dispatch: Dispatch = { [weak self] in self?.dispatch($0) }
+            let getState = { [weak self] in self?.state ?? initialState }
+            return middleware(dispatch, getState)(dispatcher)
         })
     }
 
@@ -80,9 +80,9 @@ open class Store<State> {
     ///     - initialState: The initial state passed during initialization.
     /// - Returns: A function for executing a dispatched effect block.
     private func createEffectDispatch(initialState: State) -> EffectDispatch {
-        return { [weak self] effect in
+        { [weak self] effect in
             let dispatch: Dispatch = { [weak self] in self?.dispatch($0) }
-            return effect.block(dispatch, { [weak self] in self?.state ?? initialState })
+            return effect.block(dispatch) { [weak self] in self?.state ?? initialState }
         }
     }
 
@@ -90,5 +90,4 @@ open class Store<State> {
     private var effectDispatcher: EffectDispatch!
     private let reducer: Reducer<State>
     private var middleware: [Middleware<State>] = []
-
 }

@@ -1,9 +1,8 @@
-import XCTest
 import Combine
 @testable import Reflow
+import XCTest
 
 final class StoreTests: XCTestCase {
-
     var store: Store<MockCounterState>!
     var cancellable: AnyCancellable?
 

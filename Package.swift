@@ -6,19 +6,22 @@ let package = Package(
     name: "Reflow",
     platforms: [
         .iOS(.v13),
-        .macOS(.v10_15)
+        .macOS(.v10_15),
     ],
     products: [
         .library(
             name: "Reflow",
-            targets: ["Reflow"])
+            targets: ["Reflow"]
+        ),
     ],
     targets: [
         .target(
             name: "Reflow",
-            dependencies: []),
+            dependencies: []
+        ),
         .testTarget(
             name: "ReflowTests",
-            dependencies: ["Reflow"])
+            dependencies: ["Reflow"]
+        ),
     ]
 )

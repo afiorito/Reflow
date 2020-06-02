@@ -1,14 +1,15 @@
-import XCTest
 @testable import Reflow
+import XCTest
 
 final class MiddlewareTests: XCTestCase {
     func testMiddlewareDispatcher() {
         let middleware: [Middleware<MockRouteState>] = [
             mockFirstMiddleware,
-            mockSecondMiddleware
+            mockSecondMiddleware,
         ]
 
-        let store = Store<MockRouteState>(reducer: MockRouteState.reducer, initialState: MockRouteState(route: ""), middleware: middleware)
+        let store = Store<MockRouteState>(reducer: MockRouteState.reducer, initialState: MockRouteState(route: ""),
+                                          middleware: middleware)
 
         store.dispatch(MockRouteAction.set("HOME"))
 
@@ -19,11 +20,11 @@ final class MiddlewareTests: XCTestCase {
         let middleware: [Middleware<MockRouteState>] = [
             mockFirstMiddleware,
             mockSecondMiddleware,
-            mockDispatchingMiddleware
+            mockDispatchingMiddleware,
         ]
 
         let store = Store<MockRouteState>(reducer: MockRouteState.reducer,
-                                           initialState: MockRouteState(route: ""), middleware: middleware)
+                                          initialState: MockRouteState(route: ""), middleware: middleware)
 
         store.dispatch(MockRouteAction.setIndex(100))
 
@@ -32,11 +33,10 @@ final class MiddlewareTests: XCTestCase {
 
     func testMiddlewareCanAccessState() {
         let store = Store<MockRouteState>(reducer: MockRouteState.reducer,
-                                           initialState: MockRouteState(route: "FRONT"),
-                                           middleware: [mockStateAccessingMiddleware])
+                                          initialState: MockRouteState(route: "FRONT"),
+                                          middleware: [mockStateAccessingMiddleware])
 
         store.dispatch(MockRouteAction.set("Not Passed Through"))
         XCTAssertEqual(store.state.route, "BACK")
     }
-
 }
