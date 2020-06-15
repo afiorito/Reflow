@@ -10,15 +10,15 @@ public struct Effect<State>: Action {
     /// A function for encapsulating the logic of an `Effect`.
     ///
     /// The body is called when dispatching effects.
-    public let block: EffectBlock<AnyCancellable>
+    public let block: EffectBlock<AnyCancellable?>
 
-    public init(block: @escaping EffectBlock<AnyCancellable>) {
+    public init(block: @escaping EffectBlock<AnyCancellable?>) {
         self.block = block
     }
 
     public init(block: @escaping EffectBlock<Void>) {
         self.block = { dispatch, getState in
-            Just(block(dispatch, getState)).ignoreOutput().sink(receiveValue: {})
+            Just(block(dispatch, getState)).ignoreOutput().sink {}
         }
     }
 }

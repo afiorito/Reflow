@@ -82,7 +82,9 @@ open class Store<State> {
     private func createEffectDispatch(initialState: State) -> EffectDispatch {
         { [weak self] effect in
             let dispatch: Dispatch = { [weak self] in self?.dispatch($0) }
-            return effect.block(dispatch) { [weak self] in self?.state ?? initialState }
+            return effect
+                .block(dispatch) { [weak self] in self?.state ?? initialState } ??
+                Empty(completeImmediately: true).sink {}
         }
     }
 
