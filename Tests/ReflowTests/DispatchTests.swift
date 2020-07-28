@@ -4,7 +4,6 @@ import XCTest
 
 final class DispatchTests: XCTestCase {
     var store: Store<MockCounterState>!
-    var cancellable: AnyCancellable?
 
     override func setUp() {
         super.setUp()
@@ -18,7 +17,7 @@ final class DispatchTests: XCTestCase {
         XCTAssertEqual(MockCounterState.dispatchedActions[0] as? MockCounterAction, MockCounterAction.increment)
 
         let valueExpectation = expectation(description: "value_received")
-        cancellable = store.$state.sink { state in
+        _ = store.$state.sink { state in
             XCTAssertEqual(state.counter, 1)
             valueExpectation.fulfill()
         }
@@ -35,12 +34,12 @@ final class DispatchTests: XCTestCase {
         wait(for: [valueExpectation], timeout: 10)
     }
 
-    let subject = PassthroughSubject<Int, Never>()
+    var cancellable: AnyCancellable?
 
     func testDispatchAsyncEffect() {
         let effectExpectation = expectation(description: "effect_dispatched")
-        store.dispatch(Effect<MockCounterState> { _, _ -> AnyCancellable in
-            Just(0).delay(for: .milliseconds(10), scheduler: RunLoop.main)
+        cancellable = store.dispatch(Effect<MockCounterState> { _, _ -> AnyCancellable in
+            Just(0).delay(for: .milliseconds(10), scheduler: RunLoop.current)
                 .sink(receiveCompletion: { _ in
                     effectExpectation.fulfill()
                 }, receiveValue: { _ in })
@@ -60,7 +59,7 @@ final class DispatchTests: XCTestCase {
         )
 
         let valueExpectation = expectation(description: "value_received")
-        cancellable = store.$state.sink { state in
+        _ = store.$state.sink { state in
             XCTAssertEqual(state.counter, 100)
             valueExpectation.fulfill()
         }
@@ -86,7 +85,7 @@ final class DispatchTests: XCTestCase {
         )
 
         let valueExpectation = expectation(description: "value_received")
-        cancellable = store.$state.sink { state in
+        _ = store.$state.sink { state in
             XCTAssertEqual(state.counter, 50)
             valueExpectation.fulfill()
         }
