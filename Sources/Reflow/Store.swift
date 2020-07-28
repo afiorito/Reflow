@@ -18,9 +18,9 @@ open class Store<State> {
     ///     - initialState: The initial state before any actions are dispatched.
     ///     - middleware: The middleware that process an action prior to reaching the reducer.
     public init(reducer: @escaping Reducer<State>, initialState: State, middleware: [Middleware<State>] = []) {
+        state = initialState
         self.reducer = reducer
         self.middleware += middleware
-        state = initialState
         dispatcher = createDispatcher(initialState: initialState)
         effectDispatcher = createEffectDispatch(initialState: initialState)
     }
@@ -88,8 +88,20 @@ open class Store<State> {
         }
     }
 
+    /// Returns a middleware for executing a dispatched effect block.
+    private func createEffectMiddleware() -> Middleware<State> {
+        { [weak self] dispatch, getState in
+            return { next in
+                return { action in
+                    guard let effect = action as? Effect<State> else { return next(action) }
+                    _ = self?.effectDispatcher(effect)
+                }
+            }
+        }
+    }
+
     private var dispatcher: Dispatch!
     private var effectDispatcher: EffectDispatch!
     private let reducer: Reducer<State>
-    private var middleware: [Middleware<State>] = []
+    private lazy var middleware: [Middleware<State>] = [createEffectMiddleware()]
 }

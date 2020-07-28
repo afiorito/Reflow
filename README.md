@@ -108,7 +108,7 @@ func loadCounterName(url: URL) -> AnyPublisher<String?, Never> {
 enum CounterAction: Action {
   ...
 
-  static let loadName = Effect<CounterState> { dispatch, getState -> AnyCancellable? in
+  static let loadName = Effect<CounterState> { dispatch, getState -> AnyCancellable in
     return loadCounterName(url: URL(string: "https://api.counter.com/name")!)
       .sink { name in
         dispatch(CounterAction.loadedName(name ?? ""))
