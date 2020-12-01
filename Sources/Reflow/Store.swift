@@ -90,9 +90,9 @@ open class Store<State> {
 
     /// Returns a middleware for executing a dispatched effect block.
     private func createEffectMiddleware() -> Middleware<State> {
-        { [weak self] dispatch, getState in
-            return { next in
-                return { action in
+        { [weak self] _, _ in
+            { next in
+                { action in
                     guard let effect = action as? Effect<State> else { return next(action) }
                     _ = self?.effectDispatcher(effect)
                 }
