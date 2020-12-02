@@ -9,7 +9,9 @@ open class Store<State> {
     public typealias EffectDispatch = (Effect<State>) -> AnyCancellable
 
     /// The current state of the store.
-    @Published public private(set) var state: State
+    ///
+    /// This property should only be mutated by actions, never directly.
+    @Published open var state: State
 
     /// Creates a store.
     ///
@@ -49,7 +51,7 @@ open class Store<State> {
     /// - Parameters:
     ///     - selector: A transformation function for returning derived data from the state.
     /// - Returns: A publisher for the derived data specified in the `selector`.
-    public func select<Prop: Equatable>(_ selector: @escaping (State) -> (Prop)) -> AnyPublisher<Prop, Never> {
+    open func select<Prop: Equatable>(_ selector: @escaping (State) -> (Prop)) -> AnyPublisher<Prop, Never> {
         $state.map(selector).removeDuplicates().eraseToAnyPublisher()
     }
 
