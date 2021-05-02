@@ -6,12 +6,11 @@ Reflow is a [Redux](https://github.com/reactjs/redux)-like implementation of the
 
 Reflow relies on a few concepts:
 
--  A **Store** contains the entire state of your app in a single data structure. The state is modified by dispatching actions to the store. Whenever the state changes, all selectors are updated via a Combine publisher.
+- A **Store** contains the entire state of your app in a single data structure. The state is modified by dispatching actions to the store. Whenever the state changes, all selectors are updated via a Combine publisher.
 
 - A **Reducer** is a pure function that when given action, uses the current state to create a new state.
 
 - An **Action** is a way of describing a change in state. Actions don't have logic, they are dispatched to the store and processed by reducers.
-
 
 <p align="center">
   <img width="680" src="lifecycle.png">
@@ -19,7 +18,7 @@ Reflow relies on a few concepts:
 
 ## Installation
 
-Add Injector to your project using Swift Package Manager. In your Xcode project, select `File` > `Swift Packages` > `Add Package Dependency` and enter the repository URL.
+Add Reflow to your project using Swift Package Manager. In your Xcode project, select `File` > `Swift Packages` > `Add Package Dependency` and enter the repository URL.
 
 ## Documentation
 
@@ -94,7 +93,6 @@ let cancellable = store
 ### Effects
 
 Normal (synchronous) actions don't allow for side effects like making a network call or accessing the disk. Effects allow you to perform asynchronous operations with side effects. Effects are not passed through the middleware pipeline and never reach the reducer but can dispatch to other actions.
-
 
 ```swift
 func loadCounterName(url: URL) -> AnyPublisher<String?, Never> {
@@ -176,4 +174,5 @@ let store = Store(reducer: reducers, initialState: AppState())
 ```
 
 ## License
+
 Reflow is available under the MIT license. See the [LICENSE](LICENSE) file for more info.
