@@ -4,7 +4,11 @@
 
 # format options
 
+--swiftversion 5.6
+--header ""
 --indentcase true
 --maxwidth 120
 --tabwidth 4
 --stripunusedargs closure-only
+--importgrouping testable-last
+--disable wrapMultilineStatementBraces

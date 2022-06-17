@@ -12,9 +12,11 @@ Reflow relies on a few concepts:
 
 - An **Action** is a way of describing a change in state. Actions don't have logic, they are dispatched to the store and processed by reducers.
 
-<p align="center">
-  <img width="680" src="lifecycle.png">
-</p>
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="./Sources/Reflow/Reflow.docc/Resources/flow~dark@2x.png">
+  <source media="(prefers-color-scheme: light)" srcset="./Sources/Reflow/Reflow.docc/Resources/flow@2x.png">
+  <img alt="Reflow Lifecycle" src="./Sources/Reflow/Reflow.docc/Resources/flow">
+</picture>
 
 ## Installation
 
@@ -29,7 +31,7 @@ Add Reflow to your project using Swift Package Manager. In your Xcode project, s
 
 ### Basic Usage
 
-1. Create a state representation.
+1\. Create a state representation.
 
 ```swift
 struct CounterState {
@@ -38,7 +40,7 @@ struct CounterState {
 }
 ```
 
-2. Create dispatchable actions.
+2\. Create a dispatchable action.
 
 ```swift
 enum CounterAction: Action {
@@ -47,7 +49,7 @@ enum CounterAction: Action {
 }
 ```
 
-3. Create a reducer.
+3\. Create a reducer.
 
 ```swift
 struct CounterState: Equatable {
@@ -66,19 +68,19 @@ struct CounterState: Equatable {
 }
 ```
 
-3. Create a store.
+4\. Create a store.
 
 ```swift
 let store = Store(reducer: CounterState.reducer, initialState: CounterState(count: 0, name: ""))
 ```
 
-4. Dispatch an action.
+5\. Dispatch an action.
 
 ```swift
 store.dispatch(CounterAction.increment)
 ```
 
-5. Subscribe to the store.
+6\. Subscribe to the store.
 
 ```swift
 let cancellable = store
@@ -92,38 +94,35 @@ let cancellable = store
 
 ### Effects
 
-Normal (synchronous) actions don't allow for side effects like making a network call or accessing the disk. Effects allow you to perform asynchronous operations with side effects. Effects are not passed through the middleware pipeline and never reach the reducer but can dispatch to other actions.
+Normal actions don't allow for side effects like making a network call or accessing the disk. Effects allow you to perform asynchronous operations with side effects. Effects are not passed through the middleware pipeline and never reach the reducer but can dispatch other actions and even effects.
+
+A synchronous effect can access state and dispatch other actions.
 
 ```swift
-func loadCounterName(url: URL) -> AnyPublisher<String?, Never> {
-  return URLSession(configuration: .default)
-    .dataTaskPublisher(for: url)
-    .map { String(data: $0.data, encoding: .utf8) }
-    .replaceError(with: nil)
-    .eraseToAnyPublisher()
+let store = Store(reducer: CounterState.reducer, initialState: CounterState(count: 0, name: ""))
+
+let effect = Effect<CounterState> { dispatch, getState in
+    dispatch(CounterAction.increment)
 }
-
-enum CounterAction: Action {
-  ...
-
-  static let loadName = Effect<CounterState> { dispatch, getState -> AnyCancellable in
-    return loadCounterName(url: URL(string: "https://api.counter.com/name")!)
-      .sink { name in
-        dispatch(CounterAction.loadedName(name ?? ""))
-      }
-  }
-}
-
-// dispatch the effect
-let cancellable = store.dispatch(CounterAction.loadName)
 ```
 
-Affects can also be synchronous by returning `Void`.
+An asynchronous effect can access state and dispatch other actions.
 
 ```swift
-store.dispatch(Effect<CounterState> { dispatch, getState -> Void in
-  // effect logic
-})
+func getName() async throws -> String {
+    let url = URL(string: "https://api.counter.com/name")!
+    let (data, _) = try await URLSession.shared.data(from: url)
+    return String(data: data, encoding: .utf8) ?? ""
+}
+
+let store = Store(reducer: CounterState.reducer, initialState: CounterState(count: 0, name: ""))
+
+let effect = AsyncEffect<CounterState> { dispatch, _ in
+    let name = try? await getName()
+    await MainActor.run {
+        dispatch(CounterAction.loadedName(name ?? ""))
+    }
+}
 ```
 
 ### Middleware

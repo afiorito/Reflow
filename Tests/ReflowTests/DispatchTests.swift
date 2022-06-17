@@ -1,6 +1,6 @@
 import Combine
-@testable import Reflow
 import XCTest
+@testable import Reflow
 
 final class DispatchTests: XCTestCase {
     var store: Store<MockCounterState>!
@@ -36,20 +36,20 @@ final class DispatchTests: XCTestCase {
 
     var cancellable: AnyCancellable?
 
-    func testDispatchAsyncEffect() {
-        let effectExpectation = expectation(description: "effect_dispatched")
-        cancellable = store.dispatch(Effect<MockCounterState> { _, _ -> AnyCancellable in
-            Just(0).delay(for: .milliseconds(10), scheduler: RunLoop.current)
-                .sink(receiveCompletion: { _ in
-                    effectExpectation.fulfill()
-                }, receiveValue: { _ in })
-        })
-
-        wait(for: [effectExpectation], timeout: 10)
-    }
+//    func testDispatchAsyncEffect() {
+//        let effectExpectation = expectation(description: "effect_dispatched")
+//        cancellable = store.dispatch(Effect<MockCounterState> { _, _ -> AnyCancellable in
+//            Just(0).delay(for: .milliseconds(10), scheduler: RunLoop.current)
+//                .sink(receiveCompletion: { _ in
+//                    effectExpectation.fulfill()
+//                }, receiveValue: { _ in })
+//        })
+//
+//        wait(for: [effectExpectation], timeout: 10)
+//    }
 
     func testEffectDispatch() {
-        store.dispatch(Effect<MockCounterState> { dispatch, _ -> Void in
+        store.dispatch(Effect<MockCounterState> { dispatch, _ in
             dispatch(MockCounterAction.loadCounterCompleted(100))
         })
 
@@ -71,7 +71,7 @@ final class DispatchTests: XCTestCase {
         store.dispatch(MockCounterAction.increment)
         XCTAssertEqual(MockCounterState.dispatchedActions[0] as? MockCounterAction, MockCounterAction.increment)
 
-        store.dispatch(Effect<MockCounterState> { dispatch, getState -> Void in
+        store.dispatch(Effect<MockCounterState> { dispatch, getState in
             if getState().counter == 0 {
                 dispatch(MockCounterAction.loadCounterCompleted(100))
             } else {

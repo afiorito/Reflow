@@ -1,9 +1,7 @@
-import Foundation
-
-/// A representation of a reducer function.
+/// A reducer function.
 ///
 /// Reducers are pure functions that receive state and an action to return new state.
-public typealias Reducer<State> = (State, Action) -> State
+public typealias Reducer<State> = (State, any Action) -> State
 
 /// A helper function for combining multiple reducers into a single reducer. The reducers must reduce
 /// the same type of state.
