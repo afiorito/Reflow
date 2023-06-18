@@ -1,10 +1,12 @@
 import Combine
 import Foundation
+import Observation
 
 /// A container for managing state using Combine. Manages functionality for dispatching actions/effects,
 /// running middleware, executing reducers and publishing the latest state.
 ///
 /// The ``Store`` class is not thread-safe, all changes to the store's state must be done on the same thread.
+@Observable
 public final class Store<State> {
     /// A dispatch function.
     ///
@@ -14,7 +16,31 @@ public final class Store<State> {
     /// The current state of the store.
     ///
     /// This property should only be mutated by actions, never directly.
-    @Published public private(set) var state: State
+    public private(set) var state: State {
+        get {
+            access(keyPath: \.state)
+            return _state
+        }
+        set {
+            withMutation(keyPath: \.state) {
+                _state = newValue
+            }
+        }
+    }
+
+    private let reducer: Reducer<State>
+
+    @ObservationIgnored
+    private var _state: State!
+
+    @ObservationIgnored
+    private var dispatcher: Dispatch! = nil
+
+    @ObservationIgnored
+    private var effectDispatcher: Dispatch! = nil
+
+    @ObservationIgnored
+    private lazy var middleware: [Middleware<State>] = [createEffectMiddleware()]
 
     /// Creates a store with initial state and middleware.
     ///
@@ -23,7 +49,7 @@ public final class Store<State> {
     ///     - initialState: The state before any actions are dispatched.
     ///     - middleware: The middleware that process an action prior to reaching the reducer.
     public init(reducer: @escaping Reducer<State>, initialState: State, middleware: [Middleware<State>] = []) {
-        state = initialState
+        _state = initialState
         self.reducer = reducer
         self.middleware += middleware
         dispatcher = createDispatcher(initialState: initialState)
@@ -39,22 +65,13 @@ public final class Store<State> {
         dispatcher(action)
     }
 
-    /// Returns derived data from the state based on the provided `selector` function.
-    ///
-    /// - Parameters:
-    ///     - selector: A transformation function for returning derived data from the state.
-    /// - Returns: A publisher for the derived data specified in the `selector`.
-    public func select<Prop: Equatable>(_ selector: @escaping (State) -> (Prop)) -> AnyPublisher<Prop, Never> {
-        $state.map(selector).removeDuplicates().eraseToAnyPublisher()
-    }
-
     /// Generates a new version of the state by calling the reducer with the current state and an `action`.
     ///
     /// - Parameters:
     ///     - action: An action dispatched to the store.
     private func reduce(_ action: any Action) {
         threadCheck(event: .reduce)
-        state = reducer(state, action)
+        state = reducer(_state, action)
     }
 
     /// Returns a new dispatch function that wraps a dispatch with all registered middleware.
@@ -65,7 +82,7 @@ public final class Store<State> {
     private func createDispatcher(initialState: State) -> Dispatch {
         middleware.reversed().reduce({ [weak self] action in self?.reduce(action) }, { dispatcher, middleware in
             let dispatch: Dispatch = { [weak self] in self?.dispatch($0) }
-            let getState = { [weak self] in self?.state ?? initialState }
+            let getState = { [weak self] in self?._state ?? initialState }
             return middleware(dispatch, getState)(dispatcher)
         })
     }
@@ -89,11 +106,6 @@ public final class Store<State> {
             }
         }
     }
-
-    private var dispatcher: Dispatch!
-    private var effectDispatcher: Dispatch!
-    private let reducer: Reducer<State>
-    private lazy var middleware: [Middleware<State>] = [createEffectMiddleware()]
 }
 
 // MARK: - Thread checker
@@ -109,12 +121,11 @@ extension Store {
         #if DEBUG
             guard !Thread.isMainThread else { return }
 
-            let action: String
-            switch event {
+            let action = switch event {
                 case .`init`:
-                action = "Store.init(reducer:initialState:middleware:)"
+                "Store.init(reducer:initialState:middleware:)"
                 case .reduce:
-                action = "Store.reduce(action:)"
+                "Store.reduce(action:)"
             }
 
             NSLog(

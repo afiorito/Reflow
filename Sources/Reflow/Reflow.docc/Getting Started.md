@@ -4,7 +4,7 @@ Create a basic store and dispatch actions and effects to manipulate the state.
 
 ## Overview
 
-The store is a container that manages state manipulations through dispatched actions. While actions cause simple state manipulations after passing through reducers, effects allow more complicated state interactions. As their name suggests, they can make network calls, interact with the file manager or other side effects. 
+The store is a container that manages state manipulations through dispatched actions. While actions cause simple state manipulations after passing through reducers, effects allow more complicated state interactions. As their name suggests, they can make network calls, interact with the file manager or other side effects.
 
 ### Basic Usage
 
@@ -57,16 +57,21 @@ let store = Store(reducer: CounterState.reducer, initialState: CounterState(coun
 store.dispatch(CounterAction.increment)
 ```
 
-6\. Subscribe to the store.
+6\. Observe the store.
+
+The store conforms to `Observable`. Store state can automatically be observed by SwiftUI views.
 
 ```swift
-let cancellable = store
-  .select { state in state.count }
-  .sink { count in
-    // prints "Received count: 0" before any actions are dispatched
-    // prints "Received count: 1" after action is dispatched
-    print("Received count: \(count)")
+struct ContentView: View {
+  @Environment(Store<CounterState>.self) var store
+
+  var body: some View {
+      Text("Counter: \(store.state.counter)")
+      .onTapGesture {
+          store.dispatch(CounterAction.increment)
+      }
   }
+}
 ```
 
 ### Combine Reducers

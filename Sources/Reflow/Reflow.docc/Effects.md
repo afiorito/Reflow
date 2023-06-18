@@ -6,7 +6,6 @@ Create effects that can access state, dispatch actions/effects and create side e
 
 Normal actions don't allow for side effects like making a network call or accessing the disk. Effects allow you to perform operations that may cause side effects. The dispatched effects are not passed through the middleware pipeline and never reach the reducer but can dispatch other actions and even effects.
 
-
 ### Effect
 
 A synchronous effect can access state and dispatch other actions.
@@ -17,6 +16,8 @@ let store = Store(reducer: CounterState.reducer, initialState: CounterState(coun
 let effect = Effect<CounterState> { dispatch, getState in
     dispatch(CounterAction.increment)
 }
+
+store.dispatch(effect)
 ```
 
 ### AsyncEffect
@@ -40,4 +41,6 @@ let effect = AsyncEffect<CounterState> { dispatch, _ in
         dispatch(CounterAction.loadedName(name ?? ""))
     }
 }
+
+store.dispatch(effect)
 ```

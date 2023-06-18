@@ -1,35 +1,29 @@
 @testable import Reflow
 
 struct MockCounterState: Equatable {
-    let counter: Int
+    var counter: Int = 0
 
     init(counter: Int = 0) {
         self.counter = counter
     }
 
     static func reducer(state: Self, action: any Action) -> Self {
+        dispatchedActions.append(action)
+
+        var newState = state
         switch action {
             case MockCounterAction.increment:
-                return MockCounterState(counter: state.counter + 1)
+                newState.counter += 1
+            case let MockCounterAction.loadCounterCompleted(value):
+                newState.counter = value
             default:
                 return state
         }
+
+        return newState
     }
 
     static var dispatchedActions = [any Action]()
-
-    static func dispatchTrackingReducer(state: Self, action: any Action) -> Self {
-        dispatchedActions.append(action)
-
-        switch action {
-            case MockCounterAction.increment:
-                return Self(counter: state.counter + 1)
-            case let MockCounterAction.loadCounterCompleted(value):
-                return Self(counter: value)
-            default:
-                return state
-        }
-    }
 }
 
 enum MockCounterAction: Action, Equatable {

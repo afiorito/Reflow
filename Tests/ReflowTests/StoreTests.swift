@@ -20,16 +20,4 @@ final class StoreTests: XCTestCase {
         sut.dispatch(MockCounterAction.increment)
         XCTAssertEqual(sut.state, MockCounterState(counter: 1))
     }
-
-    func testStoreSelect() {
-        let valueExpectation = expectation(description: "value_received")
-        cancellable = sut.select { state in
-            state.counter
-        }.sink { value in
-            XCTAssertEqual(value, 0)
-            valueExpectation.fulfill()
-        }
-
-        wait(for: [valueExpectation], timeout: 10)
-    }
 }

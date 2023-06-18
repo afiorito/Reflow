@@ -1,13 +1,13 @@
-// swift-tools-version:5.6
+// swift-tools-version:5.9
 
 import PackageDescription
 
 let package = Package(
     name: "Reflow",
     platforms: [
-        .iOS(.v13),
-        .macOS(.v10_15),
-        .watchOS(.v6),
+        .iOS(.v17),
+        .macOS(.v14),
+        .watchOS(.v10),
     ],
     products: [
         .library(

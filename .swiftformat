@@ -1,10 +1,6 @@
-# file options
-
---exclude Tests/ReflowTests/XCTestManifests.swift
-
 # format options
 
---swiftversion 5.6
+--swiftversion 5.9
 --header ""
 --indentcase true
 --maxwidth 120

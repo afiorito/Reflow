@@ -80,16 +80,21 @@ let store = Store(reducer: CounterState.reducer, initialState: CounterState(coun
 store.dispatch(CounterAction.increment)
 ```
 
-6\. Subscribe to the store.
+6\. Observe the store.
+
+The store conforms to `Observable`. Store state can automatically be observed by SwiftUI views.
 
 ```swift
-let cancellable = store
-  .select { state in state.count }
-  .sink { count in
-    // prints "Received count: 0" before any actions are dispatched
-    // prints "Received count: 1" after action is dispatched
-    print("Received count: \(count)")
+struct ContentView: View {
+  @Environment(Store<CounterState>.self) var store
+
+  var body: some View {
+      Text("Counter: \(store.state.counter)")
+      .onTapGesture {
+          store.dispatch(CounterAction.increment)
+      }
   }
+}
 ```
 
 ### Effects
@@ -104,6 +109,8 @@ let store = Store(reducer: CounterState.reducer, initialState: CounterState(coun
 let effect = Effect<CounterState> { dispatch, getState in
     dispatch(CounterAction.increment)
 }
+
+store.dispatch(effect)
 ```
 
 An asynchronous effect can access state and dispatch other actions.
@@ -123,6 +130,8 @@ let effect = AsyncEffect<CounterState> { dispatch, _ in
         dispatch(CounterAction.loadedName(name ?? ""))
     }
 }
+
+store.dispatch(effect)
 ```
 
 ### Middleware
