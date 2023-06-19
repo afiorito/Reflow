@@ -23,8 +23,10 @@ public func combineReducers<State>(_ reducers: Reducer<State>...) -> Reducer<Sta
 ///     - keyPath: The key representing the substate property of the entire state.
 ///     - reducer: The reducer for the given substate.
 /// - Returns: A reducer that returns the entire state.
-public func withKey<State, SubState>(_ keyPath: WritableKeyPath<State, SubState>,
-                                     use reducer: @escaping Reducer<SubState>) -> Reducer<State> {
+public func withKey<State, SubState>(
+    _ keyPath: WritableKeyPath<State, SubState>,
+    use reducer: @escaping Reducer<SubState>
+) -> Reducer<State> {
     { state, action in
         var state = state
         state[keyPath: keyPath] = reducer(state[keyPath: keyPath], action)

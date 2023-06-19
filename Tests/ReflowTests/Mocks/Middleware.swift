@@ -1,17 +1,15 @@
 import XCTest
 @testable import Reflow
 
-var mockFirstMiddleware: Middleware<MockRouteState> = { _, _ in
-    { next in
-        { action in
-            switch action {
-                case let MockRouteAction.set(route):
-                    next(MockRouteAction.set(route + " FIRST"))
-                default:
-                    next(action)
-            }
-        }
+var mockFirstMiddleware: Middleware<MockRouteState> = { _, _ in { next in { action in
+    switch action {
+        case let MockRouteAction.set(route):
+            next(MockRouteAction.set(route + " FIRST"))
+        default:
+            next(action)
     }
+}
+}
 }
 
 var mockSecondMiddleware: Middleware<MockRouteState> = { _, _ in

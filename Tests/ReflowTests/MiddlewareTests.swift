@@ -96,8 +96,10 @@ final class MiddlewareTests: XCTestCase {
 }
 
 extension MiddlewareTests {
-    func createStore(initialState: String = "",
-                     middleware: [Middleware<MockRouteState>] = []) -> Store<MockRouteState> {
+    func createStore(
+        initialState: String = "",
+        middleware: [Middleware<MockRouteState>] = []
+    ) -> Store<MockRouteState> {
         Store(
             reducer: MockRouteState.reducer,
             initialState: MockRouteState(route: initialState),
